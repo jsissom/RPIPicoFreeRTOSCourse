@@ -16,7 +16,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-
 class Agent {
 public:
 	/***
@@ -43,7 +42,6 @@ public:
 	 */
 	virtual void stop();
 
-
 	/***
 	 * Get high water for stack
 	 * @return close to zero means overflow risk
@@ -61,12 +59,12 @@ protected:
 	 * Start the task via static function
 	 * @param pvParameters - will be the Agent object
 	 */
-	static void vTask( void * pvParameters );
+	static void vTask(void * pvParameters);
 
 	/***
 	 * Task main run loop
 	 */
-	virtual void run()=0;
+	virtual void run() = 0;
 
 	/***
 	 * Get the static depth required in words
@@ -78,9 +76,6 @@ protected:
 	TaskHandle_t xHandle = NULL;
 
 	char pName[MAX_NAME_LEN];
-
-
 };
-
 
 #endif /* SRC_AGENT_H_ */

@@ -5,7 +5,6 @@
  * 15-Aug-2022
  */
 
-
 #include "pico/stdlib.h"
 
 #include "FreeRTOS.h"
@@ -19,7 +18,6 @@
 #include "DecoderAgent.h"
 #include "IOAgent.h"
 
-
 //Standard Task priority
 #define TASK_PRIORITY		( tskIDLE_PRIORITY + 1UL )
 
@@ -31,61 +29,53 @@
 #define LED4_PAD			5
 #define LED5_PAD		   15
 
-
-void runTimeStats(   ){
+void runTimeStats() {
 	TaskStatus_t *pxTaskStatusArray;
 	volatile UBaseType_t uxArraySize, x;
 	unsigned long ulTotalRunTime;
 
+	// Get number of takss
+	uxArraySize = uxTaskGetNumberOfTasks();
+	printf("Number of tasks %d\n", uxArraySize);
 
-   // Get number of takss
-   uxArraySize = uxTaskGetNumberOfTasks();
-   printf("Number of tasks %d\n", uxArraySize);
+	//Allocate a TaskStatus_t structure for each task.
+	pxTaskStatusArray = (TaskStatus_t *)pvPortMalloc(uxArraySize * sizeof(TaskStatus_t));
 
-   //Allocate a TaskStatus_t structure for each task.
-   pxTaskStatusArray = (TaskStatus_t *)pvPortMalloc( uxArraySize * sizeof( TaskStatus_t ) );
+	if (pxTaskStatusArray != NULL) {
+		// Generate raw status information about each task.
+    	uxArraySize = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize, &ulTotalRunTime);
 
-   if( pxTaskStatusArray != NULL ){
-      // Generate raw status information about each task.
-      uxArraySize = uxTaskGetSystemState( pxTaskStatusArray,
-                                 uxArraySize,
-                                 &ulTotalRunTime );
+		// Print stats
+		for(x = 0; x < uxArraySize; x++) {
+			printf("Task: %d \t cPri:%d \t bPri:%d \t hw:%d \t%s\n",
+				pxTaskStatusArray[x].xTaskNumber,
+				pxTaskStatusArray[x].uxCurrentPriority,
+				pxTaskStatusArray[x].uxBasePriority,
+				pxTaskStatusArray[x].usStackHighWaterMark,
+				pxTaskStatusArray[x].pcTaskName);
+		}
 
-	 // Print stats
-	 for( x = 0; x < uxArraySize; x++ )
-	 {
-		 printf("Task: %d \t cPri:%d \t bPri:%d \t hw:%d \t%s\n",
-				pxTaskStatusArray[ x ].xTaskNumber ,
-				pxTaskStatusArray[ x ].uxCurrentPriority ,
-				pxTaskStatusArray[ x ].uxBasePriority ,
-				pxTaskStatusArray[ x ].usStackHighWaterMark ,
-				pxTaskStatusArray[ x ].pcTaskName
-				);
-	 }
+		// Free array
+		vPortFree(pxTaskStatusArray);
+	} else {
+		printf("Failed to allocate space for stats\n");
+	}
 
-
-      // Free array
-      vPortFree( pxTaskStatusArray );
-   } else {
-	   printf("Failed to allocate space for stats\n");
-   }
-
-   //Get heap allocation information
-   HeapStats_t heapStats;
-   vPortGetHeapStats(&heapStats);
-   printf("HEAP avl: %d, blocks %d, alloc: %d, free: %d\n",
-		   heapStats.xAvailableHeapSpaceInBytes,
-		   heapStats.xNumberOfFreeBlocks,
-		   heapStats.xNumberOfSuccessfulAllocations,
-		   heapStats.xNumberOfSuccessfulFrees
-		   );
+	//Get heap allocation information
+	HeapStats_t heapStats;
+	vPortGetHeapStats(&heapStats);
+	printf("HEAP avl: %d, blocks %d, alloc: %d, free: %d\n",
+		heapStats.xAvailableHeapSpaceInBytes,
+		heapStats.xNumberOfFreeBlocks,
+		heapStats.xNumberOfSuccessfulAllocations,
+		heapStats.xNumberOfSuccessfulFrees);
 }
 
 /***
  * Salt Random number generator using current temperature
  * Otherwise both Pico will go through same random sequence
  */
-void saltRand(){
+void saltRand() {
 	adc_init();
 	adc_set_temp_sensor_enabled(true);
 	adc_select_input(4);
@@ -96,12 +86,11 @@ void saltRand(){
 	srand(seed);
 }
 
-
 /***
  * Main task to blink external LED
  * @param params - unused
  */
-void mainTask(void *params){
+void mainTask(void *params) {
 	char line[80];
 	BlinkAgent blink(LED_PAD);
 	CounterAgent counter(LED1_PAD, LED2_PAD, LED3_PAD, LED4_PAD);
@@ -114,22 +103,18 @@ void mainTask(void *params){
 	blink.start("Blink", TASK_PRIORITY);
 	counter.start("Counter", TASK_PRIORITY);
 	decoder.start("Decode", TASK_PRIORITY);
-	ioAgent.start("IO Agent", TASK_PRIORITY +1 );
+	ioAgent.start("IO Agent", TASK_PRIORITY + 1);
 
-	while (true) { // Loop forever
+	while (true) {
 		runTimeStats();
 		vTaskDelay(3000);
 	}
 }
 
-
-
-
 /***
  * Launch the tasks and scheduler
  */
-void vLaunch( void) {
-
+void vLaunch(void) {
 	//Start blink task
     TaskHandle_t task;
     xTaskCreate(mainTask, "MainThread", 500, NULL, TASK_PRIORITY, &task);
@@ -142,8 +127,7 @@ void vLaunch( void) {
  * Main
  * @return
  */
-int main( void )
-{
+int main(void) {
 	//Setup serial over USB and give a few seconds to settle before we start
     stdio_init_all();
     sleep_ms(2000);
@@ -153,7 +137,6 @@ int main( void )
     const char *rtos_name = "FreeRTOS";
     printf("Starting %s on core 0:\n", rtos_name);
     vLaunch();
-
 
     return 0;
 }

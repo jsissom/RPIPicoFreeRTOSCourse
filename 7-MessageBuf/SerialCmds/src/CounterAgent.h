@@ -23,7 +23,6 @@
 
 class CounterAgent : public Agent {
 public:
-
 	/***
 	 * Contructor
 	 * @param gp1 GPIO PAD for 1st LED - units
@@ -31,7 +30,7 @@ public:
 	 * @param gp3 GPIO PAD for 1st LED - 4
 	 * @param gp4 GPIO PAD for 1st LED - 8
 	 */
-	CounterAgent(uint8_t gp1=0, uint8_t gp2=0, uint8_t gp3=0, uint8_t gp4=0);
+	CounterAgent(uint8_t gp1 = 0, uint8_t gp2 = 0, uint8_t gp3 = 0, uint8_t gp4 = 0);
 
 	/***
 	 * Destructor
@@ -56,12 +55,10 @@ public:
 	virtual void blink(uint8_t count);
 
 protected:
-
 	/***
 	 * Run loop for the agent.
 	 */
 	virtual void run();
-
 
 	/***
 	 * Get the static depth required in words
@@ -74,7 +71,6 @@ protected:
 	 */
 	virtual void init();
 
-
 	/***
 	 * Set the LEDs to the mask in count
 	 * @param count
@@ -86,7 +82,6 @@ protected:
 
 	//Queue of commands
 	QueueHandle_t xCmdQ;
-
 };
 
 #endif /* COUNTERAGENT_H_ */

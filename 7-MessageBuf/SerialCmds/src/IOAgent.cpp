@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include "hardware/uart.h"
 
-
 /***
  * Constructor
  * @param agent - DecoderAgent to pass input string to
@@ -21,7 +20,6 @@
 IOAgent::IOAgent(DecoderAgent *agent, uint8_t gp) {
 	pAgent = agent;
 	xLedPad = gp;
-
 }
 
 /***
@@ -35,7 +33,7 @@ IOAgent::~IOAgent() {
  * Get the static depth required in words
  * @return - words
  */
-configSTACK_DEPTH_TYPE IOAgent::getMaxStackSize(){
+configSTACK_DEPTH_TYPE IOAgent::getMaxStackSize() {
 	return 300;
 }
 
@@ -43,66 +41,65 @@ configSTACK_DEPTH_TYPE IOAgent::getMaxStackSize(){
 /***
   * Main Run Task for agent
   */
- void IOAgent::run(){
-	 uint32_t lastMsg, now;
-	 char line[IO_AGENT_LINE_LEN];
+void IOAgent::run() {
+	uint32_t lastMsg, now;
+	char line[IO_AGENT_LINE_LEN];
 
-	 init();
+	init();
 
-	 printf("IO Agent started\n");
+	printf("IO Agent started\n");
 
-	 lastMsg = to_ms_since_boot (get_absolute_time ());
+	lastMsg = to_ms_since_boot(get_absolute_time());
 
-	 while(true){
-		 if (uart_is_readable_within_us(uart0, 10)){
-			 char c = uart_getc	(uart0);
-			 if ((c == '\n') || (c == '\r') || (c == 0)){
-				 if (xLineIdx > 0){
-					 pLine[xLineIdx] = 0;
+	while(true) {
+		if (uart_is_readable_within_us(uart0, 10)) {
+			char c = uart_getc(uart0);
+			if ((c == '\n') || (c == '\r') || (c == 0)) {
+				if (xLineIdx > 0) {
+					pLine[xLineIdx] = 0;
 
-					 printf("LINE READ:%s \n", pLine);
-					 xLineIdx = 0;
-					 lastMsg = to_ms_since_boot (get_absolute_time ());
-					 if (pAgent != NULL){
-						 pAgent->add(pLine);
-					 }
-					 setConductor(false);
-				 }
-			 } else {
-				 //printf("Read %x %c\n", c, c);
-				 pLine[xLineIdx++] = c;
+					printf("LINE READ:%s \n", pLine);
+					xLineIdx = 0;
+					lastMsg = to_ms_since_boot(get_absolute_time());
+					if (pAgent != NULL) {
+						pAgent->add(pLine);
+					}
+					setConductor(false);
+				}
+			} else {
+				//printf("Read %x %c\n", c, c);
+				pLine[xLineIdx++] = c;
 
-				 if (xLineIdx > IO_AGENT_LINE_LEN){
-					 printf("ERROR: line length exceed %d\n", IO_AGENT_LINE_LEN);
-					 xLineIdx = 0;
-				 }
-			 }
-	 	 } else {
-			 vTaskDelay(10);
-		 }
+				if (xLineIdx > IO_AGENT_LINE_LEN) {
+					printf("ERROR: line length exceed %d\n", IO_AGENT_LINE_LEN);
+					xLineIdx = 0;
+				}
+			}
+		} else {
+			vTaskDelay(10);
+		}
 
-		 now = to_ms_since_boot (get_absolute_time ());
-		 if ((now - lastMsg ) > IO_MSG_WAIT){
-			 //Become conductor
-			 uint8_t r = rand() & 0x0F;
-			 sprintf(line, "{\"count\": %d}\r\n", r);
-			 printf("I am conductor 0x%X\n", r);
-			 write(line);
-			 if (pAgent != NULL){
-				 pAgent->add(line);
-			 }
+		now = to_ms_since_boot(get_absolute_time());
+		if ((now - lastMsg) > IO_MSG_WAIT) {
+			//Become conductor
+			uint8_t r = rand() & 0x0F;
+			sprintf(line, "{\"count\": %d}\r\n", r);
+			printf("I am conductor 0x%X\n", r);
+			write(line);
+			if (pAgent != NULL) {
+				pAgent->add(line);
+			}
 
-			 lastMsg = now;
-			 setConductor(true);
-		 }
-	 }
+			lastMsg = now;
+			setConductor(true);
+		}
+	}
 }
-
 
 /***
  * Initislise the UART0 and LED
  */
-void IOAgent::init(){
+void IOAgent::init() {
 	// Initialise UART 0
 	uart_init(uart0, IO_AGENT_BAUD);
 	uart_set_format	(uart0, 8, 1, UART_PARITY_NONE);
@@ -121,15 +118,14 @@ void IOAgent::init(){
  * Write the string out through the UART
  * @param line - c string
  */
-void IOAgent::write(char *line){
-	uart_puts (uart0, line);
+void IOAgent::write(char *line) {
+	uart_puts(uart0, line);
 }
-
 
 /***
  * Set if conductor or not. If conductor will turn on LED
  * @param isConductor - boolean true if conductor
  */
-void IOAgent::setConductor(bool isConductor){
+void IOAgent::setConductor(bool isConductor) {
 	gpio_put(xLedPad, isConductor);
 }

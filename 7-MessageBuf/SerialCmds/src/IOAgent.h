@@ -25,7 +25,6 @@
 #define IO_AGENT_LINE_LEN 80
 #define IO_MSG_WAIT 3000
 
-
 class IOAgent : public Agent{
 public:
 	/***
@@ -48,12 +47,10 @@ public:
 	void write(char *line);
 
 protected:
-
 	/***
 	 * Run loop for the agent.
 	 */
 	virtual void run();
-
 
 	/***
 	 * Get the static depth required in words
@@ -83,8 +80,6 @@ protected:
 
 	// GPIO Pad number for the LED
 	uint8_t xLedPad = 0;
-
 };
-
 
 #endif /* 7_MESSAGEBUF_JSONCMDS_SRC_IOAGENT_H_ */

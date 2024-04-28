@@ -19,7 +19,6 @@
 #include "CounterAgent.h"
 #include "Agent.h"
 
-
 #define DECODE_BUFFER_LEN 1024
 #define DECODE_LINE_LEN 80
 #define DECODE_WAIT_TIME 3000
@@ -45,12 +44,10 @@ public:
 	virtual void add(char *txt);
 
 protected:
-
 	/***
 	 * Run loop for the agent.
 	 */
 	virtual void run();
-
 
 	/***
 	 * Get the static depth required in words
@@ -72,8 +69,6 @@ protected:
 
 	// Json decoding buffer
 	json_t pJsonPool[ DECODE_JSON_POOL ];
-
 };
-
 
 #endif /* 7_MESSAGEBUF_JSONCMDS_SRC_DECODERAGENT_H_ */

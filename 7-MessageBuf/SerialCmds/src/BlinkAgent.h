@@ -16,7 +16,6 @@
 
 #include "Agent.h"
 
-
 class BlinkAgent: public Agent {
 public:
 	/***
@@ -30,14 +29,11 @@ public:
 	 */
 	virtual ~BlinkAgent();
 
-
 protected:
-
 	/***
 	 * Run loop for the agent.
 	 */
 	virtual void run();
-
 
 	/***
 	 * Get the static depth required in words
@@ -47,8 +43,6 @@ protected:
 
 	//GPIO PAD for LED
 	uint8_t xLedPad = 0;
-
 };
-
 
 #endif /* BLINKAGENT_H_ */
